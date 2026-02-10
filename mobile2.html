@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Schedule to Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            padding: 15px 15px 100px 15px;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s;
+        }
+
+        /* DARK THEME */
+        body.theme-dark {
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 25%, #0f0f0f 50%, #191919 75%, #0a0a0a 100%);
+            --primary-text: #e8e8e8;
+            --secondary-text: #d0d0d0;
+            --accent: #ccccff;
+            --success: #88dd99;
+            --bg-container: rgba(20, 20, 20, 0.7);
+            --bg-header: rgba(25, 25, 25, 0.7);
+            --bg-input: rgba(18, 18, 18, 0.7);
+            --bg-focus: rgba(30, 30, 30, 0.85);
+            --border-color: rgba(200, 200, 200, 0.15);
+        }
+
+        /* LIGHT THEME */
+        body.theme-light {
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 25%, #f8f8f8 50%, #fafafa 75%, #f0f0f0 100%);
+            --primary-text: #1a1a1a;
+            --secondary-text: #4a4a4a;
+            --accent: #5555ff;
+            --success: #2d8a4d;
+            --bg-container: rgba(255, 255, 255, 0.85);
+            --bg-header: rgba(245, 245, 245, 0.9);
+            --bg-input: rgba(250, 250, 250, 0.9);
+            --bg-focus: rgba(235, 235, 245, 0.95);
+            --border-color: rgba(100, 100, 100, 0.2);
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            background: var(--bg-container);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                        0 0 0 1px rgba(255, 255, 255, 0.06);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            flex: 1;
+            width: 100%;
+            z-index: 11;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px 8px 80px 8px;
+            }
+
+            .container {
+                padding: 12px;
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 35px;
+            }
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.25) 50%, 
+                transparent);
+            border-radius: 20px 20px 0 0;
+        }
+
+        h1 {
+            color: var(--primary-text);
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 6px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                gap: 6px;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .header {
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+            }
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--primary-text);
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        @media (max-width: 480px) {
+            .theme-toggle {
+                width: 20px;
+                height: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            opacity: 0.7;
+        }
+
+        .help-btn {
+            background: transparent;
+            border: none;
+            color: var(--secondary-text);
+            opacity: 0.4;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .help-btn {
+                width: 16px;
+                height: 16px;
+                font-size: 0.8rem;
+                margin-left: 4px;
+            }
+        }
+
+        .help-btn:hover {
+            opacity: 0.8;
+        }
+
+        .date-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .date-btn-group {
+            display: flex;
+            gap: 6px;
+            background: var(--bg-header);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            .date-btn-group {
+                gap: 3px;
+                padding: 2px;
+                border-radius: 8px;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .date-btn-group {
+                font-size: 0.85rem;
+            }
+        }
+
+        .date-btn {
+            padding: 6px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            color: var(--primary-text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 480px) {
+            .date-btn {
+                padding: 4px 8px;
+                font-size: 0.65rem;
+                border-radius: 5px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .date-btn {
+                padding: 7px 14px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .date-btn:active {
+            transform: scale(0.95);
+        }
+
+        .date-btn:hover {
+            background: rgba(100, 100, 100, 0.3);
+            color: var(--accent);
+        }
+
+        .date-btn.active {
+            background: rgba(103, 126, 234, 0.35);
+            color: var(--accent);
+            box-shadow: 0 2px 8px rgba(103, 126, 234, 0.2);
+        }
+
+        input[type="date"] {
+            display: none !important;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table {
+                font-size: 0.75rem;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .schedule-table {
+                margin-bottom: 20px;
+                font-size: 1rem;
+            }
+        }
+
+        .schedule-table thead {
+            background: var(--bg-header);
+            backdrop-filter: blur(10px);
+        }
+
+        .schedule-table th {
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table th {
+                padding: 6px 4px;
+                font-size: 0.6rem;
+                letter-spacing: 0.2px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .schedule-table th {
+                padding: 12px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .schedule-table th:first-child {
+            border-radius: 10px 0 0 0;
+        }
+
+        .schedule-table th:last-child {
+            border-radius: 0 10px 0 0;
+        }
+
+        .schedule-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .schedule-table tbody tr:hover {
+            background: rgba(100, 100, 100, 0.15);
+        }
+
+        .schedule-table tbody tr.focused {
+            background: rgba(103, 126, 234, 0.15);
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 2px rgba(103, 126, 234, 0.3);
+        }
+
+        .schedule-table td {
+            padding: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table td {
+                padding: 5px 3px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .schedule-table td {
+                padding: 10px;
+            }
+        }
+
+        .time-input {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        @media (max-width: 480px) {
+            .time-input {
+                gap: 2px;
+            }
+        }
+
+        input[type="text"],
+        input[type="text"]:invalid {
+            padding: 6px 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 7px;
+            font-size: 0.85rem;
+            background: var(--bg-input);
+            backdrop-filter: blur(5px);
+            color: var(--primary-text);
+            transition: all 0.25s;
+            position: relative;
+            z-index: 5;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        @media (max-width: 480px) {
+            input[type="text"],
+            input[type="text"]:invalid {
+                padding: 4px 6px;
+                font-size: 0.75rem;
+                border-radius: 5px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            input[type="text"],
+            input[type="text"]:invalid {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        input[type="text"]:focus {
+            outline: none !important;
+            border-color: rgba(103, 126, 234, 0.6) !important;
+            background: var(--bg-focus) !important;
+            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.12) !important;
+            position: relative;
+            z-index: 15;
+        }
+
+        input[type="text"].show-error {
+            border: 2px solid #ff4444 !important;
+            background: rgba(255, 68, 68, 0.2) !important;
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.15), 0 0 8px rgba(255, 68, 68, 0.3) !important;
+            position: relative;
+            z-index: 15;
+        }
+
+        input[type="text"].show-error::placeholder {
+            color: #ff4444 !important;
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--secondary-text);
+            opacity: 0.5;
+        }
+
+        .time-input input {
+            width: 60px;
+        }
+
+        @media (max-width: 480px) {
+            .time-input input {
+                width: 50px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .time-input input {
+                width: 70px;
+            }
+        }
+
+        .time-input select {
+            padding: 6px 4px;
+            border: 2px solid var(--border-color);
+            border-radius: 7px;
+            font-size: 0.8rem;
+            background: var(--bg-input);
+            backdrop-filter: blur(5px);
+            color: var(--primary-text);
+            cursor: pointer;
+            transition: all 0.25s;
+            min-width: 45px;
+        }
+
+        @media (max-width: 480px) {
+            .time-input select {
+                padding: 4px 2px;
+                font-size: 0.7rem;
+                min-width: 40px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .time-input select {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+                min-width: 50px;
+            }
+        }
+
+        .time-input select:focus {
+            outline: none;
+            border-color: rgba(103, 126, 234, 0.6);
+            background: var(--bg-focus);
+        }
+
+        .time-input select:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: rgba(20, 25, 35, 0.3);
+        }
+
+        .desc-input {
+            width: 100%;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 480px) {
+            .row-actions {
+                gap: 4px;
+            }
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 5px 7px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            min-width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .action-btn {
+                padding: 4px 6px;
+                font-size: 0.65rem;
+                min-width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .action-btn {
+                padding: 6px 9px;
+                font-size: 0.8rem;
+                min-width: 32px;
+                height: 32px;
+            }
+        }
+
+        .action-btn:hover {
+            border-color: rgba(103, 126, 234, 0.5);
+            color: var(--accent);
+            background: rgba(100, 100, 100, 0.3);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .more-btn {
+            background: var(--bg-header);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 6px 9px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .more-btn {
+                padding: 4px 6px;
+                font-size: 0.65rem;
+                min-width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .more-btn {
+                padding: 7px 11px;
+                font-size: 0.9rem;
+                min-width: 36px;
+                height: 36px;
+            }
+        }
+
+        .more-btn:active {
+            transform: scale(0.95);
+        }
+
+        .more-btn:hover {
+            border-color: rgba(103, 126, 234, 0.5);
+            color: var(--accent);
+            background: rgba(100, 100, 100, 0.3);
+        }
+
+        .more-btn.active {
+            background: rgba(103, 126, 234, 0.35);
+            border-color: rgba(103, 126, 234, 0.6);
+            color: var(--accent);
+        }
+
+        .extra-fields {
+            display: none;
+            padding: 15px;
+            background: var(--bg-input);
+            backdrop-filter: blur(12px);
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 480px) {
+            .extra-fields {
+                padding: 10px;
+                border-radius: 8px;
+                margin-top: 6px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .extra-fields {
+                padding: 18px;
+            }
+        }
+
+        .extra-fields.show {
+            display: block;
+        }
+
+        .extra-row {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .extra-row {
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .extra-row {
+                margin-bottom: 12px;
+            }
+        }
+
+        .extra-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .extra-fields label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--secondary-text);
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            .extra-fields label {
+                font-size: 0.7rem;
+                margin-bottom: 3px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .extra-fields label {
+                font-size: 0.8rem;
+                margin-bottom: 5px;
+            }
+        }
+
+        .extra-fields input,
+        .extra-fields textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            font-size: 0.8rem;
+            background: rgba(25, 30, 45, 0.5);
+            backdrop-filter: blur(5px);
+            color: var(--primary-text);
+        }
+
+        @media (max-width: 480px) {
+            .extra-fields input,
+            .extra-fields textarea {
+                padding: 5px 6px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .extra-fields input,
+            .extra-fields textarea {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .extra-fields input:focus,
+        .extra-fields textarea:focus {
+            outline: none;
+            border-color: rgba(103, 126, 234, 0.6);
+            background: var(--bg-focus);
+        }
+
+        .extra-fields textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 480px) {
+            .buttons {
+                gap: 6px;
+                margin-top: 10px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .buttons {
+                gap: 12px;
+                margin-top: 25px;
+            }
+        }
+
+        button {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 480px) {
+            button {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            button {
+                padding: 11px 22px;
+                font-size: 0.95rem;
+            }
+        }
+
+        .add-btn {
+            background: rgba(103, 126, 234, 0.35);
+            color: var(--accent);
+            border: 1px solid rgba(103, 126, 234, 0.45);
+        }
+
+        .add-btn:active {
+            transform: scale(0.95);
+        }
+
+        .add-btn:hover {
+            background: rgba(103, 126, 234, 0.45);
+            border-color: rgba(103, 126, 234, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(103, 126, 234, 0.25);
+        }
+
+        .generate-btn {
+            background: rgba(72, 187, 120, 0.3);
+            color: var(--success);
+            border: 1px solid rgba(72, 187, 120, 0.4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        @media (max-width: 480px) {
+            .generate-btn {
+                min-width: 140px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .generate-btn {
+                min-width: 200px;
+            }
+        }
+
+        .generate-btn:active {
+            transform: scale(0.95);
+        }
+
+        .generate-btn:hover {
+            background: rgba(72, 187, 120, 0.45);
+            border-color: rgba(72, 187, 120, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+        }
+
+        .preview-btn {
+            background: transparent;
+            color: var(--secondary-text);
+            opacity: 0.5;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            padding: 8px 16px;
+        }
+
+        @media (max-width: 480px) {
+            .preview-btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .preview-btn {
+                font-size: 0.85rem;
+                padding: 9px 18px;
+            }
+        }
+
+        .preview-btn:hover {
+            opacity: 1;
+            border-color: var(--border-color);
+            background: rgba(100, 100, 100, 0.2);
+        }
+
+        .success-message {
+            background: rgba(30, 58, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(72, 187, 120, 0.35);
+            color: var(--success);
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            .success-message {
+                padding: 8px 10px;
+                margin-bottom: 8px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .success-message {
+                padding: 13px 16px;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error {
+            background: rgba(58, 30, 30, 0.6);
+            backdrop-filter: blur(12px);
+            color: #ff8a8a;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(252, 129, 129, 0.35);
+            display: none;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            .error {
+                padding: 8px 10px;
+                margin-bottom: 8px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .error {
+                padding: 13px 16px;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            padding: 18px;
+            background: var(--bg-input);
+            backdrop-filter: blur(18px);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .preview-container {
+                margin-top: 10px;
+                padding: 10px;
+                border-radius: 8px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .preview-container {
+                margin-top: 25px;
+                padding: 22px;
+            }
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-container h3 {
+            color: var(--primary-text);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            .preview-container h3 {
+                margin-bottom: 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .preview-container h3 {
+                margin-bottom: 15px;
+                font-size: 1rem;
+            }
+        }
+
+        .preview-content {
+            background: rgba(8, 12, 22, 0.9);
+            padding: 12px;
+            border-radius: 9px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.7rem;
+            color: #9ca8b8;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .preview-content {
+                padding: 8px;
+                font-size: 0.65rem;
+                max-height: 200px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .preview-content {
+                padding: 16px;
+                font-size: 0.8rem;
+                max-height: 400px;
+                line-height: 1.5;
+            }
+        }
+
+        .preview-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .preview-content::-webkit-scrollbar-track {
+            background: rgba(25, 30, 45, 0.4);
+            border-radius: 5px;
+        }
+
+        .preview-content::-webkit-scrollbar-thumb {
+            background: rgba(103, 126, 234, 0.35);
+            border-radius: 5px;
+        }
+
+        .preview-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(103, 126, 234, 0.5);
+        }
+
+        .col-time { width: 100px; }
+        .col-desc { width: auto; }
+        .col-endtime { width: 100px; }
+        .col-actions { width: 90px; text-align: center; }
+
+        @media (max-width: 480px) {
+            .col-time { width: 55px; }
+            .col-endtime { width: 55px; }
+            .col-actions { width: 70px; }
+        }
+
+        @media (min-width: 768px) {
+            .col-time { width: 125px; }
+            .col-endtime { width: 125px; }
+            .col-actions { width: 110px; }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-container);
+            backdrop-filter: blur(24px);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 15px;
+                border-radius: 12px;
+                max-width: 90vw;
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content h2 {
+            color: var(--primary-text);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 480px) {
+            .modal-content h2 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .modal-section h3 {
+                font-size: 0.9rem;
+                margin-bottom: 6px;
+            }
+        }
+
+        .modal-section ul {
+            list-style: none;
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .modal-section ul {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+        }
+
+        .modal-section ul li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .modal-section ul li:before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .modal-close {
+            background: rgba(103, 126, 234, 0.35);
+            color: var(--accent);
+            border: 1px solid rgba(103, 126, 234, 0.45);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .modal-close:hover {
+            background: rgba(103, 126, 234, 0.45);
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="header-left">
+                    <h1>Schedule to Calendar</h1>
+                    <div class="header-controls">
+                        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeToggle">🌙</button>
+                        <button class="help-btn" onclick="openHelp()" title="Help">?</button>
+                    </div>
+                </div>
+                <div class="date-section">
+                    <div class="date-btn-group">
+                        <button class="date-btn active" id="todayBtn" onclick="setToday()">Today</button>
+                        <button class="date-btn" id="tomorrowBtn" onclick="setTomorrow()">Tomorrow</button>
+                        <button class="date-btn" id="chooseBtn" onclick="chooseDate()">Choose</button>
+                    </div>
+                    <input type="date" id="scheduleDate" required>
+                </div>
+            </div>
+
+            <div class="error" id="errorMessage"></div>
+            <div class="success-message" id="successMessage">✅ ICS file downloaded successfully!</div>
+
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th class="col-time">Start Time</th>
+                        <th class="col-desc">Description</th>
+                        <th class="col-endtime">End Time</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleEntries">
+                </tbody>
+            </table>
+
+            <div class="buttons">
+                <button class="add-btn" onclick="addEntry()">+ Add Row</button>
+                <button class="generate-btn" onclick="generateAndDownloadICS()">🗓️ Generate & Download</button>
+                <button class="preview-btn" onclick="togglePreview()">Preview</button>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+                <h3>ICS File Preview</h3>
+                <div class="preview-content" id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <h2>📚 Help & Features</h2>
+
+            <div class="modal-section">
+                <h3>✨ Features</h3>
+                <ul>
+                    <li>Schedule entries with start/end times and descriptions</li>
+                    <li>Auto-calculate end times from next row's start time</li>
+                    <li>Add location, notes, and URLs to events</li>
+                    <li>Cascade AM/PM changes to all rows below</li>
+                    <li>Preview your ICS file before downloading</li>
+                    <li>Works with Google Calendar, Apple Calendar, Outlook, etc.</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h3>🎮 How to Use</h3>
+                <ul>
+                    <li>Select a date using Today/Tomorrow/Choose buttons</li>
+                    <li>Enter start time (e.g., 9:30, 1245, 8:00)</li>
+                    <li>Add a description for each block</li>
+                    <li>Optional: Add end time and AM/PM period</li>
+                    <li>Optional: Click ⋯ for location, notes, URL</li>
+                    <li>Click "Generate & Download ICS" to save</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h3>⌨️ Shortcuts & Tips</h3>
+                <ul>
+                    <li>Time format: 930, 9:30, 12:00 all work</li>
+                    <li>Invalid times (like 9:99) show red error</li>
+                    <li>Change any AM/PM to cascade to rows below</li>
+                    <li>Both start time & description required to save</li>
+                    <li>↻ = Reset row (clears all fields)</li>
+                    <li>✕ = Delete row (removes entry)</li>
+                    <li>Red outline = invalid field</li>
+                </ul>
+            </div>
+
+            <button class="modal-close" onclick="closeHelp()">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        let entryCount = 0;
+        let expandedRows = new Set();
+        let currentTheme = 'dark';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            document.getElementById('scheduleDate').value = dateString;
+
+            for (let i = 0; i < 5; i++) {
+                addEntry();
+            }
+
+            document.getElementById('helpModal').addEventListener('click', function(e) {
+                if (e.target.id === 'helpModal') {
+                    closeHelp();
+                }
+            });
+
+            document.getElementById('scheduleDate').addEventListener('change', function(e) {
+                if (e.target.value) {
+                    updateDateButtons('custom');
+                }
+            });
+
+            const savedTheme = localStorage.getItem('scheduleTheme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    setTheme('dark');
+                } else {
+                    setTheme('light');
+                }
+            }
+        });
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.className = 'theme-' + theme;
+            localStorage.setItem('scheduleTheme', theme);
+
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        function openHelp() {
+            document.getElementById('helpModal').classList.add('show');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.remove('show');
+        }
+
+        function setToday() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            document.getElementById('scheduleDate').value = dateString;
+            updateDateButtons('today');
+        }
+
+        function setTomorrow() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateString = tomorrow.toISOString().split('T')[0];
+            document.getElementById('scheduleDate').value = dateString;
+            updateDateButtons('tomorrow');
+        }
+
+        function chooseDate() {
+            const dateInput = document.getElementById('scheduleDate');
+            try {
+                if (dateInput.showPicker) {
+                    dateInput.showPicker();
+                } else {
+                    dateInput.click();
+                }
+            } catch (e) {
+                dateInput.click();
+            }
+        }
+
+        function updateDateButtons(activeBtn) {
+            const dateInput = document.getElementById('scheduleDate').value;
+            const selectedDate = new Date(dateInput + 'T00:00:00');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const todayString = today.toISOString().split('T')[0];
+            const tomorrowString = tomorrow.toISOString().split('T')[0];
+
+            document.getElementById('todayBtn').classList.remove('active');
+            document.getElementById('tomorrowBtn').classList.remove('active');
+            document.getElementById('chooseBtn').classList.remove('active');
+
+            const chooseBtn = document.getElementById('chooseBtn');
+
+            if (activeBtn === 'today' || dateInput === todayString) {
+                document.getElementById('todayBtn').classList.add('active');
+                chooseBtn.textContent = 'Choose';
+            } else if (activeBtn === 'tomorrow' || dateInput === tomorrowString) {
+                document.getElementById('tomorrowBtn').classList.add('active');
+                chooseBtn.textContent = 'Choose';
+            } else {
+                chooseBtn.classList.add('active');
+                const formattedDate = selectedDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                chooseBtn.textContent = formattedDate;
+            }
+        }
+
+        function isValidTime(timeStr) {
+            if (!timeStr) return false;
+
+            const numericStr = timeStr.replace(/[^0-9]/g, '');
+            if (numericStr.length === 0) return false;
+
+            let hours, minutes;
+
+            if (numericStr.length <= 2) {
+                hours = parseInt(numericStr);
+                minutes = 0;
+            } else if (numericStr.length === 3) {
+                hours = parseInt(numericStr[0]);
+                minutes = parseInt(numericStr.substring(1));
+            } else if (numericStr.length === 4) {
+                hours = parseInt(numericStr.substring(0, 2));
+                minutes = parseInt(numericStr.substring(2));
+            } else {
+                return false;
+            }
+
+            return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+        }
+
+        function addEntry() {
+            entryCount++;
+            const tbody = document.getElementById('scheduleEntries');
+
+            const tr = document.createElement('tr');
+            tr.id = 'entry-' + entryCount;
+            tr.dataset.entry = entryCount;
+
+            tr.innerHTML = '<td><div class="time-input"><input type="text" placeholder="8:00" data-entry="' + entryCount + '" data-field="time" maxlength="5"><select data-entry="' + entryCount + '" data-field="period" onchange="cascadeAMPM(' + entryCount + ')"><option value="AM">AM</option><option value="PM">PM</option></select></div></td><td><input type="text" class="desc-input" placeholder="Meeting, task, etc..." data-entry="' + entryCount + '" data-field="description"></td><td><div class="time-input"><input type="text" placeholder="9:00" data-entry="' + entryCount + '" data-field="endtime" maxlength="5"><select data-entry="' + entryCount + '" data-field="endperiod" disabled><option value="AM">AM</option><option value="PM">PM</option></select></div></td><td><div class="row-actions"><button class="more-btn" onclick="toggleExtra(' + entryCount + ')" id="more-' + entryCount + '" title="More options">⋯</button><button class="action-btn" id="action-' + entryCount + '" onclick="toggleAction(' + entryCount + ')" title="Reset/Delete">✕</button></div></td>';
+
+            tbody.appendChild(tr);
+
+            const extraTr = document.createElement('tr');
+            extraTr.id = 'extra-' + entryCount;
+            extraTr.innerHTML = '<td colspan="4"><div class="extra-fields" id="extra-fields-' + entryCount + '"><div class="extra-row"><label>Location</label><input type="text" placeholder="Room 301, Zoom link, etc." data-entry="' + entryCount + '" data-field="location"></div><div class="extra-row"><label>Notes / Description</label><textarea placeholder="Additional details about this event..." data-entry="' + entryCount + '" data-field="notes"></textarea></div><div class="extra-row"><label>URL / Link</label><input type="text" placeholder="https://zoom.us/..." data-entry="' + entryCount + '" data-field="url"></div></div></td>';
+
+            tbody.appendChild(extraTr);
+
+            const timeInput = tr.querySelector('[data-field="time"]');
+            const endTimeInput = tr.querySelector('[data-field="endtime"]');
+            const endPeriodSelect = tr.querySelector('[data-field="endperiod"]');
+            const descInput = tr.querySelector('[data-field="description"]');
+            const actionBtn = document.getElementById('action-' + entryCount);
+
+            function updateActionButton() {
+                const timeVal = timeInput.value.trim();
+                const descVal = descInput.value.trim();
+                const endTimeVal = endTimeInput.value.trim();
+                const locVal = document.querySelector('#extra-' + entryCount + ' [data-field="location"]').value.trim();
+                const noteVal = document.querySelector('#extra-' + entryCount + ' [data-field="notes"]').value.trim();
+                const urlVal = document.querySelector('#extra-' + entryCount + ' [data-field="url"]').value.trim();
+
+                const hasData = timeVal || descVal || endTimeVal || locVal || noteVal || urlVal;
+
+                if (hasData) {
+                    actionBtn.textContent = '↻';
+                    actionBtn.title = 'Reset row';
+                } else {
+                    actionBtn.textContent = '✕';
+                    actionBtn.title = 'Delete row';
+                }
+            }
+
+            function validateTimeOnInput(e) {
+                const value = e.target.value.trim();
+                e.target.classList.remove('show-error');
+
+                if (value.length === 0) {
+                    return;
+                }
+
+                if (!isValidTime(value)) {
+                    e.target.classList.add('show-error');
+                }
+                updateActionButton();
+            }
+
+            function validateDescInput(e) {
+                const value = e.target.value.trim();
+                timeInput.classList.remove('show-error');
+                updateActionButton();
+            }
+
+            timeInput.addEventListener('input', validateTimeOnInput);
+            endTimeInput.addEventListener('input', validateTimeOnInput);
+            descInput.addEventListener('input', validateDescInput);
+
+            document.querySelector('#extra-' + entryCount + ' [data-field="location"]').addEventListener('input', updateActionButton);
+            document.querySelector('#extra-' + entryCount + ' [data-field="notes"]').addEventListener('input', updateActionButton);
+            document.querySelector('#extra-' + entryCount + ' [data-field="url"]').addEventListener('input', updateActionButton);
+
+            function restrictTimeInput(e) {
+                const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+                if (allowedKeys.includes(e.key)) return;
+                if (!/[0-9:]/.test(e.key)) e.preventDefault();
+            }
+
+            timeInput.addEventListener('keydown', restrictTimeInput);
+            endTimeInput.addEventListener('keydown', restrictTimeInput);
+
+            const allInputs = tr.querySelectorAll('input, select, button');
+            allInputs.forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    document.querySelectorAll('.schedule-table tbody tr[data-entry]').forEach(function(row) {
+                        row.classList.remove('focused');
+                    });
+                    tr.classList.add('focused');
+                });
+            });
+
+            endTimeInput.addEventListener('input', function(e) {
+                endPeriodSelect.disabled = e.target.value.trim().length === 0;
+            });
+        }
+
+        function toggleAction(entryId) {
+            const actionBtn = document.getElementById('action-' + entryId);
+
+            if (actionBtn.textContent.includes('↻')) {
+                resetRow(entryId);
+            } else {
+                deleteRow(entryId);
+            }
+        }
+
+        function resetRow(entryId) {
+            const tr = document.querySelector('tr[data-entry="' + entryId + '"]');
+            const extraTr = document.getElementById('extra-' + entryId);
+
+            tr.querySelectorAll('input[type="text"]').forEach(function(input) {
+                input.value = '';
+                input.classList.remove('show-error');
+            });
+
+            tr.querySelectorAll('select[data-field="period"]').forEach(function(select) {
+                select.value = 'AM';
+            });
+
+            const endPeriodSelect = tr.querySelector('[data-field="endperiod"]');
+            if (endPeriodSelect) {
+                endPeriodSelect.value = 'AM';
+                endPeriodSelect.disabled = true;
+            }
+
+            extraTr.querySelectorAll('input[type="text"], textarea').forEach(function(input) {
+                input.value = '';
+            });
+
+            const actionBtn = document.getElementById('action-' + entryId);
+            actionBtn.textContent = '✕';
+            actionBtn.title = 'Delete row';
+        }
+
+        function deleteRow(entryId) {
+            const allRows = Array.from(document.querySelectorAll('tr[data-entry]'));
+            if (allRows.length <= 1) {
+                showError('You must keep at least 1 row!');
+                return;
+            }
+
+            const tr = document.querySelector('tr[data-entry="' + entryId + '"]');
+            const extraTr = document.getElementById('extra-' + entryId);
+
+            tr.style.opacity = '0';
+            extraTr.style.opacity = '0';
+            tr.style.transform = 'translateY(-10px)';
+            extraTr.style.transform = 'translateY(-10px)';
+
+            setTimeout(function() {
+                tr.remove();
+                extraTr.remove();
+            }, 200);
+        }
+
+        function cascadeAMPM(entryId) {
+            const currentRow = document.querySelector('tr[data-entry="' + entryId + '"]');
+            const periodSelect = currentRow.querySelector('[data-field="period"]');
+            const selectedPeriod = periodSelect.value;
+
+            const allRows = Array.from(document.querySelectorAll('tr[data-entry]'));
+            const currentIndex = allRows.indexOf(currentRow);
+
+            for (let i = currentIndex + 1; i < allRows.length; i++) {
+                const row = allRows[i];
+                const rowPeriodSelect = row.querySelector('[data-field="period"]');
+                if (rowPeriodSelect) {
+                    rowPeriodSelect.value = selectedPeriod;
+                }
+            }
+        }
+
+        function toggleExtra(entryId) {
+            const extraFields = document.getElementById('extra-fields-' + entryId);
+            const moreBtn = document.getElementById('more-' + entryId);
+
+            if (expandedRows.has(entryId)) {
+                extraFields.classList.remove('show');
+                moreBtn.classList.remove('active');
+                expandedRows.delete(entryId);
+            } else {
+                extraFields.classList.add('show');
+                moreBtn.classList.add('active');
+                expandedRows.add(entryId);
+            }
+        }
+
+        function togglePreview() {
+            const previewContainer = document.getElementById('previewContainer');
+            if (previewContainer.classList.contains('show')) {
+                previewContainer.classList.remove('show');
+            } else {
+                previewICS();
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(function() {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        function showSuccess() {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.classList.add('show');
+            setTimeout(function() {
+                successDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        function parseTimeShorthand(timeStr) {
+            if (!timeStr) return null;
+            const numericStr = timeStr.replace(/[^0-9]/g, '');
+            if (numericStr.length === 0) return null;
+
+            let hours, minutes;
+            if (numericStr.length <= 2) {
+                hours = parseInt(numericStr);
+                minutes = 0;
+            } else if (numericStr.length === 3) {
+                hours = parseInt(numericStr[0]);
+                minutes = parseInt(numericStr.substring(1));
+            } else if (numericStr.length === 4) {
+                hours = parseInt(numericStr.substring(0, 2));
+                minutes = parseInt(numericStr.substring(2));
+            } else {
+                return null;
+            }
+
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+            return { hours: hours, minutes: minutes };
+        }
+
+        function convertTo24Hour(time, period) {
+            let hours = time.hours;
+            if (period === 'PM' && hours < 12) hours += 12;
+            else if (period === 'AM' && hours === 12) hours = 0;
+            return { hours: hours, minutes: time.minutes };
+        }
+
+        function formatDateTime(date, time) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(time.hours).padStart(2, '0');
+            const minutes = String(time.minutes).padStart(2, '0');
+            return year + month + day + 'T' + hours + minutes + '00';
+        }
+
+        function formatUTCDateTime(date) {
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const hours = String(date.getUTCHours()).padStart(2, '0');
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+            return year + month + day + 'T' + hours + minutes + seconds + 'Z';
+        }
+
+        function generateUID() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function escapeICSText(text) {
+            if (!text) return '';
+            return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+        }
+
+        function validateEntries() {
+            const rows = document.querySelectorAll('tr[data-entry]');
+            const entries = [];
+            let isValid = true;
+
+            for (let row of rows) {
+                const timeInput = row.querySelector('[data-field="time"]');
+                const descInput = row.querySelector('[data-field="description"]');
+                const timeVal = timeInput.value.trim();
+                const descVal = descInput.value.trim();
+
+                timeInput.classList.remove('show-error');
+                descInput.classList.remove('show-error');
+
+                if (!timeVal && !descVal) continue;
+
+                if (!timeVal || !descVal) {
+                    if (!timeVal) timeInput.classList.add('show-error');
+                    if (!descVal) descInput.classList.add('show-error');
+                    isValid = false;
+                    continue;
+                }
+
+                if (!isValidTime(timeVal)) {
+                    timeInput.classList.add('show-error');
+                    isValid = false;
+                    continue;
+                }
+
+                const period = row.querySelector('[data-field="period"]').value;
+                const endTimeInput = row.querySelector('[data-field="endtime"]').value;
+                const endPeriod = row.querySelector('[data-field="endperiod"]').value;
+
+                const startTime = parseTimeShorthand(timeVal);
+                if (!startTime) {
+                    timeInput.classList.add('show-error');
+                    isValid = false;
+                    continue;
+                }
+
+                const startTime24 = convertTo24Hour(startTime, period);
+                let endTime24 = null;
+                if (endTimeInput && endTimeInput.trim().length > 0) {
+                    if (!isValidTime(endTimeInput)) {
+                        row.querySelector('[data-field="endtime"]').classList.add('show-error');
+                        isValid = false;
+                        continue;
+                    }
+                    const endTime = parseTimeShorthand(endTimeInput);
+                    if (!endTime) {
+                        row.querySelector('[data-field="endtime"]').classList.add('show-error');
+                        isValid = false;
+                        continue;
+                    }
+                    endTime24 = convertTo24Hour(endTime, endPeriod);
+                }
+
+                const extraRow = document.getElementById('extra-' + row.dataset.entry);
+                const location = extraRow.querySelector('[data-field="location"]').value || '';
+                const notes = extraRow.querySelector('[data-field="notes"]').value || '';
+                const url = extraRow.querySelector('[data-field="url"]').value || '';
+
+                entries.push({ startTime: startTime24, endTime: endTime24, description: descVal, location: location, notes: notes, url: url });
+            }
+
+            if (!isValid) {
+                showError('Check red outlined fields. Both start time & description required for each entry.');
+                return null;
+            }
+            if (entries.length === 0) {
+                showError('Please add at least one schedule entry.');
+                return null;
+            }
+
+            entries.sort(function(a, b) {
+                return (a.startTime.hours * 60 + a.startTime.minutes) - (b.startTime.hours * 60 + b.startTime.minutes);
+            });
+
+            for (let i = 0; i < entries.length; i++) {
+                if (!entries[i].endTime) {
+                    if (i < entries.length - 1) {
+                        entries[i].endTime = entries[i + 1].startTime;
+                    } else {
+                        const hours = entries[i].startTime.hours + 1;
+                        entries[i].endTime = { hours: hours % 24, minutes: entries[i].startTime.minutes };
+                    }
+                }
+            }
+            return entries;
+        }
+
+        function generateICSContent(entries, scheduleDate) {
+            let icsContent = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Schedule Generator//EN\r\nCALSCALE:GREGORIAN\r\n';
+            const dtstamp = formatUTCDateTime(new Date());
+
+            for (let entry of entries) {
+                const uid = generateUID();
+                const dtstart = formatDateTime(scheduleDate, entry.startTime);
+                const dtend = formatDateTime(scheduleDate, entry.endTime);
+
+                icsContent += 'BEGIN:VEVENT\r\nUID:' + uid + '\r\nDTSTAMP:' + dtstamp + '\r\nDTSTART:' + dtstart + '\r\nDTEND:' + dtend + '\r\nSUMMARY:' + escapeICSText(entry.description) + '\r\n';
+                if (entry.location) icsContent += 'LOCATION:' + escapeICSText(entry.location) + '\r\n';
+                if (entry.notes) icsContent += 'DESCRIPTION:' + escapeICSText(entry.notes) + '\r\n';
+                if (entry.url) icsContent += 'URL:' + entry.url + '\r\n';
+                icsContent += 'STATUS:CONFIRMED\r\nEND:VEVENT\r\n';
+            }
+            icsContent += 'END:VCALENDAR\r\n';
+            return icsContent;
+        }
+
+        function previewICS() {
+            try {
+                const dateInput = document.getElementById('scheduleDate').value;
+                if (!dateInput) {
+                    showError('Please select a schedule date.');
+                    return;
+                }
+                const scheduleDate = new Date(dateInput + 'T00:00:00');
+                const entries = validateEntries();
+                if (!entries) return;
+
+                const icsContent = generateICSContent(entries, scheduleDate);
+                document.getElementById('previewContent').textContent = icsContent;
+                document.getElementById('previewContainer').classList.add('show');
+                document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function generateAndDownloadICS() {
+            try {
+                const dateInput = document.getElementById('scheduleDate').value;
+                if (!dateInput) {
+                    showError('Please select a schedule date.');
+                    return;
+                }
+                const scheduleDate = new Date(dateInput + 'T00:00:00');
+                const entries = validateEntries();
+                if (!entries) return;
+
+                const icsContent = generateICSContent(entries, scheduleDate);
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'schedule-' + dateInput + '.ics';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 100);
+                showSuccess();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+    </script>
+</body>
+</html>
