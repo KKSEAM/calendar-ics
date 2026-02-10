@@ -1060,37 +1060,38 @@
         let expandedRows = new Set();
         let currentTheme = "dark";
         
-        document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
-            const today = new Date();
-            const dateString = today.toISOString().split("T")[0];
-            document.getElementById("scheduleDate").value = dateString;
-            
-            // create 3 initial rows
-            for (let i = 0; i < 3; i++) {
-                addEntry();
-            }
-            
-            document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-            document.getElementById("helpBtn").addEventListener("click", openHelp);
-            document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
-            document.getElementById("todayBtn").addEventListener("click", setToday);
-            document.getElementById("tomorrowBtn").addEventListener("click", setTomorrow);
-            document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
-            document.getElementById("addRowBtn").addEventListener("click", addEntry);
-            document.getElementById("generateBtn").addEventListener("click", generateAndDownloadICS);
-            document.getElementById("previewBtn").addEventListener("click", togglePreview);
-            
-            document.getElementById("helpModal").addEventListener("click", function(e) {
-                if (e.target.id === "helpModal") closeHelp();
-            });
-            
-            document.getElementById("scheduleDate").addEventListener("change", function(e) {
-                if (e.target.value) updateDateButtons("custom");
-            });
-            
-            const savedTheme = localStorage.getItem("scheduleTheme") || "dark";
-            setTheme(savedTheme);
-        });
+        document.addEventListener("DOMContentLoaded", function() {
+    const today = new Date();
+    const dateString = today.toISOString().split("T")[0];
+    document.getElementById("scheduleDate").value = dateString;
+
+    // ✅ create 3 initial rows
+    for (let i = 0; i < 3; i++) {
+        addEntry();
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    document.getElementById("helpBtn").addEventListener("click", openHelp);
+    document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+    document.getElementById("todayBtn").addEventListener("click", setToday);
+    document.getElementById("tomorrowBtn").addEventListener("click", setTomorrow);
+    document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
+    document.getElementById("addRowBtn").addEventListener("click", addEntry);
+    document.getElementById("generateBtn").addEventListener("click", generateAndDownloadICS);
+    document.getElementById("previewBtn").addEventListener("click", togglePreview);
+
+    document.getElementById("helpModal").addEventListener("click", function(e) {
+        if (e.target.id === "helpModal") closeHelp();
+    });
+
+    document.getElementById("scheduleDate").addEventListener("change", function(e) {
+        if (e.target.value) updateDateButtons("custom");
+    });
+
+    const savedTheme = localStorage.getItem("scheduleTheme") || "dark";
+    setTheme(savedTheme);
+});
+
         
         function toggleTheme() {
             const newTheme = currentTheme === "dark" ? "light" : "dark";
@@ -1134,11 +1135,13 @@
         
         function chooseDateClicked() {
     const dateInput = document.getElementById("scheduleDate");
-    // Try native picker if supported
+    if (!dateInput) return;
+
     if (dateInput.showPicker) {
+        // Newer Chrome/Android/desktop
         dateInput.showPicker();
     } else {
-        // Fallback for mobile browsers
+        // iOS / older browsers
         setTimeout(function () {
             dateInput.focus();
             dateInput.click();
@@ -1306,18 +1309,19 @@ tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\
                 toggleAMPM(entryId, "endperiod");
             });
             
-            actionBtn.addEventListener("click", function() {
-                const allRows = Array.from(document.querySelectorAll("tr[data-entry]"));
-                if (actionBtn.textContent.includes("↻")) {
-                    resetRow(entryId);
-                } else {
-                    if (allRows.length <= 1) {
-                        showError("You must keep at least 1 row!");
-                    } else {
-                        deleteRow(entryId);
-                    }
-                }
-            });
+            ctionBtn.addEventListener("click", function() {
+    const allRows = Array.from(document.querySelectorAll("tr[data-entry]"));
+    if (actionBtn.textContent.includes("↻")) {
+        resetRow(entryId);
+    } else {
+        // ✅ keep at least 1 row
+        if (allRows.length <= 1) {
+            showError("You must keep at least 1 row!");
+        } else {
+            deleteRow(entryId);
+        }
+    }
+});
             
             moreBtn.addEventListener("click", function() {
                 toggleExtra(entryId);
@@ -1631,6 +1635,7 @@ tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\
     </script>
 </body>
 </html>
+
 
 
 
