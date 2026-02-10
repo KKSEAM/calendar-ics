@@ -978,17 +978,17 @@
             <div class="success-message" id="successMessage">✅ ICS file downloaded successfully!</div>
             
             <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th class="col-time">Start Time</th>
-                        <th class="col-desc">Description</th>
-                        <th class="col-endtime">End Time</th>
-                        <th class="col-actions">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="scheduleEntries">
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th class="col-time">Start Time</th>
+            <th class="col-desc">Description</th>
+            <th class="col-endtime">End Time</th>
+            <th class="col-actions">Actions</th>
+        </tr>
+    </thead>
+    <tbody id="scheduleEntries">
+    </tbody>
+</table>
             
             <div class="buttons">
                 <button type="button" class="add-btn" id="addRowBtn">+ Add Row</button>
@@ -1050,13 +1050,13 @@
         </div>
     </div>
     
-    <div class="version-info">Schedule to Calendar v1.1.1 (Mobile)</div>
+    <div class="version-info">Schedule to Calendar v1.1.2 (Mobile)</div>
     <script>
         let entryCount = 0;
         let expandedRows = new Set();
         let currentTheme = "dark";
         
-        document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
             const today = new Date();
             const dateString = today.toISOString().split("T")[0];
             document.getElementById("scheduleDate").value = dateString;
@@ -1129,11 +1129,18 @@
         }
         
         function chooseDateClicked() {
-            const dateInput = document.getElementById("scheduleDate");
-            setTimeout(function() {
-                dateInput.click();
-            }, 10);
-        }
+    const dateInput = document.getElementById("scheduleDate");
+    // Try native picker if supported
+    if (dateInput.showPicker) {
+        dateInput.showPicker();
+    } else {
+        // Fallback for mobile browsers
+        setTimeout(function () {
+            dateInput.focus();
+            dateInput.click();
+        }, 10);
+    }
+}
         
         function toggleAMPM(entryId, fieldType) {
             const btn = document.querySelector("[data-entry=\"" + entryId + "\"][data-field=\"" + fieldType + "\"]");
@@ -1208,7 +1215,7 @@
             tr.id = "entry-" + entryCount;
             tr.dataset.entry = entryCount;
             
-            tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\"8:00\" data-entry=\"" + entryCount + "\" data-field=\"time\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"period\">AM</button></div></td><td><input type=\"text\" class=\"desc-input\" placeholder=\"Meeting, task, etc...\" data-entry=\"" + entryCount + "\" data-field=\"description\"></td><td><div class=\"time-input\"><input type=\"text\" placeholder=\"9:00\" data-entry=\"" + entryCount + "\" data-field=\"endtime\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"endperiod\" disabled>AM</button></div></td><td><div class=\"row-actions\"><button type=\"button\" class=\"more-btn\" id=\"more-" + entryCount + "\" title=\"More options\">⋯</button><button type=\"button\" class=\"action-btn\" id=\"action-" + entryCount + "\" title=\"Reset/Delete\">✕</button></div></td>";
+tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\"8:00\" data-entry=\"" + entryCount + "\" data-field=\"time\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"period\">AM</button></div></td><td><input type=\"text\" class=\"desc-input\" placeholder=\"Meeting, task, etc...\" data-entry=\"" + entryCount + "\" data-field=\"description\"></td><td><div class=\"time-input\"><input type=\"text\" placeholder=\"9:00\" data-entry=\"" + entryCount + "\" data-field=\"endtime\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"endperiod\" disabled>AM</button></div></td><td><div class=\"row-actions\"><button type=\"button\" class=\"more-btn\" id=\"more-" + entryCount + "\" title=\"More options\">⋯</button><button type=\"button\" class=\"action-btn\" id=\"action-" + entryCount + "\" title=\"Reset/Delete\">✕</button></div></td>";
             
             tbody.appendChild(tr);
             
@@ -1620,4 +1627,5 @@
     </script>
 </body>
 </html>
+
 
