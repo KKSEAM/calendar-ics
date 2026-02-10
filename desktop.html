@@ -771,7 +771,7 @@
         <div class="container">
             <div class="header">
                 <div class="header-left">
-                    <h1>ICS Calendar Blocks</h1>
+                    <h1>Calendar Blocks</h1>
                     <div class="header-controls">
                         <button type="button" class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
                         <button type="button" class="help-btn" id="helpBtn" title="Help">?</button>
@@ -788,7 +788,7 @@
             </div>
             
             <div class="error" id="errorMessage"></div>
-            <div class="success-message" id="successMessage">✅ ICS file downloaded successfully!</div>
+            <div class="success-message" id="successMessage">ICS file downloaded successfully!</div>
             
             <table class="schedule-table">
                 <thead>
@@ -859,7 +859,18 @@
         </div>
     </div>
     
-    <div class="version-info">Calendar Blocks v1.1.2 (Desktop) · <a href="https://github.com/KKSEAM/calendar-ics">GitHub</a> · Discord: <code>ilovelifethankyou</code></div>
+    <style>
+  .version-info {
+    white-space: nowrap;
+  }
+</style>
+
+<div class="version-info">
+  Calendar Blocks v1.1.2 (Desktop) ·
+  <a href="https://github.com/KKSEAM/calendar-ics">GitHub</a> ·
+  Discord: <code>ilovelifethankyou</code>
+</div>
+
     <script>
         let entryCount = 0;
         let expandedRows = new Set();
