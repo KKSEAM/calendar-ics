@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0d0d0d">
-    <title>Schedule to Calendar - Mobile</title>
+    <title>Calendar Blocks - Mobile</title>
     <style>
         * {
             margin: 0;
@@ -958,7 +958,7 @@
         <div class="container">
             <div class="header">
                 <div class="header-left">
-                    <h1>Schedule to Calendar</h1>
+                    <h1>Calendar Blocks</h1>
                     <div class="header-controls">
                         <button type="button" class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
                         <button type="button" class="help-btn" id="helpBtn" title="Help">?</button>
@@ -975,7 +975,7 @@
             </div>
             
             <div class="error" id="errorMessage"></div>
-            <div class="success-message" id="successMessage">✅ ICS file downloaded successfully!</div>
+            <div class="success-message" id="successMessage">ICS file downloaded successfully!</div>
             
             <table class="schedule-table">
     <thead>
@@ -992,7 +992,7 @@
             
             <div class="buttons">
                 <button type="button" class="add-btn" id="addRowBtn">+ Add Row</button>
-                <button type="button" class="generate-btn" id="generateBtn">🗓️ Generate & Download</button>
+                <button type="button" class="generate-btn" id="generateBtn">Generate & Download</button>
                 <button type="button" class="preview-btn" id="previewBtn">Preview</button>
             </div>
             
@@ -1006,10 +1006,10 @@
     <!-- Help Modal -->
     <div class="modal" id="helpModal">
         <div class="modal-content">
-            <h2>📚 Help & Features</h2>
+            <h2>Help & Features</h2>
             
             <div class="modal-section">
-                <h3>✨ Features</h3>
+                <h3>Features</h3>
                 <ul>
                     <li>Schedule entries with start/end times and descriptions</li>
                     <li>Auto-calculate end times from next row's start time</li>
@@ -1021,7 +1021,7 @@
             </div>
             
             <div class="modal-section">
-                <h3>🎮 How to Use</h3>
+                <h3>How to Use</h3>
                 <ul>
                     <li>Select a date using Today/Tomorrow/Choose buttons</li>
                     <li>Enter start time (e.g., 9:30, 1245, 8:00)</li>
@@ -1033,7 +1033,7 @@
             </div>
             
             <div class="modal-section">
-                <h3>⌨️ Shortcuts & Tips</h3>
+                <h3>Shortcuts & Tips</h3>
                 <ul>
                     <li>Time format: 930, 9:30, 12:00 all work</li>
                     <li>Invalid times (like 9:99) show red error</li>
@@ -1050,7 +1050,11 @@
         </div>
     </div>
     
-    <div class="version-info">Schedule to Calendar v1.1.2 (Mobile)</div>
+   <div class="version-info">
+  Calendar Blocks v1.1.2 (Mobile) ·
+  <a href="https://github.com/KKSEAM/calendar-ics">GitHub</a> ·
+  Discord: <code>ilovelifethankyou</code>
+</div>
     <script>
         let entryCount = 0;
         let expandedRows = new Set();
@@ -1627,5 +1631,6 @@ tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\
     </script>
 </body>
 </html>
+
 
 
