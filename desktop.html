@@ -949,11 +949,10 @@
         }
 
         function toggleAMPM(button) {
-    if (button.disabled) return;
+    if (!button || button.disabled) return;
 
     const currentValue = button.textContent.trim();
-    const newValue = currentValue === 'AM' ? 'PM' : 'AM';
-    button.textContent = newValue;
+    button.textContent = currentValue === 'AM' ? 'PM' : 'AM';
 
     const entryId = button.dataset.entry;
     cascadeAMPM(entryId);
