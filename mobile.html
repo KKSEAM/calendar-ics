@@ -977,7 +977,7 @@
             <div class="error" id="errorMessage"></div>
             <div class="success-message" id="successMessage">ICS file downloaded successfully!</div>
             
-            <table class="schedule-table">
+           <table class="schedule-table">
     <thead>
         <tr>
             <th class="col-time">Start Time</th>
@@ -1071,14 +1071,14 @@
     }
 
     document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-    document.getElementById("helpBtn").addEventListener("click", openHelp);
-    document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
-    document.getElementById("todayBtn").addEventListener("click", setToday);
-    document.getElementById("tomorrowBtn").addEventListener("click", setTomorrow);
-    document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
-    document.getElementById("addRowBtn").addEventListener("click", addEntry);
-    document.getElementById("generateBtn").addEventListener("click", generateAndDownloadICS);
-    document.getElementById("previewBtn").addEventListener("click", togglePreview);
+document.getElementById("helpBtn").addEventListener("click", openHelp);
+document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+document.getElementById("todayBtn").addEventListener("click", setToday);
+document.getElementById("tomorrowBtn").addEventListener("click", setTomorrow);
+document.getElementById("chooseBtn").addEventListener("click", chooseDateClicked);
+document.getElementById("addRowBtn").addEventListener("click", addEntry);
+document.getElementById("generateBtn").addEventListener("click", generateAndDownloadICS);
+document.getElementById("previewBtn").addEventListener("click", togglePreview);
 
     document.getElementById("helpModal").addEventListener("click", function(e) {
         if (e.target.id === "helpModal") closeHelp();
@@ -1215,25 +1215,63 @@
         }
         
         function addEntry() {
-            entryCount++;
-            const tbody = document.getElementById("scheduleEntries");
-            
-            const tr = document.createElement("tr");
-            tr.id = "entry-" + entryCount;
-            tr.dataset.entry = entryCount;
-            
-tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\"8:00\" data-entry=\"" + entryCount + "\" data-field=\"time\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"period\">AM</button></div></td><td><input type=\"text\" class=\"desc-input\" placeholder=\"Meeting, task, etc...\" data-entry=\"" + entryCount + "\" data-field=\"description\"></td><td><div class=\"time-input\"><input type=\"text\" placeholder=\"9:00\" data-entry=\"" + entryCount + "\" data-field=\"endtime\" maxlength=\"5\"><button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"endperiod\" disabled>AM</button></div></td><td><div class=\"row-actions\"><button type=\"button\" class=\"more-btn\" id=\"more-" + entryCount + "\" title=\"More options\">⋯</button><button type=\"button\" class=\"action-btn\" id=\"action-" + entryCount + "\" title=\"Reset/Delete\">✕</button></div></td>";
-            
-            tbody.appendChild(tr);
-            
-            const extraTr = document.createElement("tr");
-            extraTr.id = "extra-" + entryCount;
-            extraTr.innerHTML = "<td colspan=\"4\"><div class=\"extra-fields\" id=\"extra-fields-" + entryCount + "\"><div class=\"extra-row\"><label>Location</label><input type=\"text\" placeholder=\"Room 301, Zoom link, etc.\" data-entry=\"" + entryCount + "\" data-field=\"location\"></div><div class=\"extra-row\"><label>Notes / Description</label><textarea placeholder=\"Additional details about this event...\" data-entry=\"" + entryCount + "\" data-field=\"notes\"></textarea></div><div class=\"extra-row\"><label>URL / Link</label><input type=\"text\" placeholder=\"https://zoom.us/...\" data-entry=\"" + entryCount + "\" data-field=\"url\"></div></div></td>";
-            
-            tbody.appendChild(extraTr);
-            
-            setupEntryListeners(entryCount);
-        }
+    entryCount++;
+    const tbody = document.getElementById("scheduleEntries");
+
+    const tr = document.createElement("tr");
+    tr.id = "entry-" + entryCount;
+    tr.dataset.entry = entryCount;
+
+    tr.innerHTML =
+        "<td>" +
+            "<div class=\"time-input\">" +
+                "<input type=\"text\" placeholder=\"8:00\" data-entry=\"" + entryCount + "\" data-field=\"time\" maxlength=\"5\">" +
+                "<button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"period\">AM</button>" +
+            "</div>" +
+        "</td>" +
+        "<td>" +
+            "<input type=\"text\" class=\"desc-input\" placeholder=\"Meeting, task, etc...\" data-entry=\"" + entryCount + "\" data-field=\"description\">" +
+        "</td>" +
+        "<td>" +
+            "<div class=\"time-input\">" +
+                "<input type=\"text\" placeholder=\"9:00\" data-entry=\"" + entryCount + "\" data-field=\"endtime\" maxlength=\"5\">" +
+                "<button type=\"button\" class=\"ampm-btn\" data-entry=\"" + entryCount + "\" data-field=\"endperiod\" disabled>AM</button>" +
+            "</div>" +
+        "</td>" +
+        "<td>" +
+            "<div class=\"row-actions\">" +
+                "<button type=\"button\" class=\"more-btn\" id=\"more-" + entryCount + "\" title=\"More options\">⋯</button>" +
+                "<button type=\"button\" class=\"action-btn\" id=\"action-" + entryCount + "\" title=\"Reset/Delete\">✕</button>" +
+            "</div>" +
+        "</td>";
+
+    tbody.appendChild(tr);
+
+    const extraTr = document.createElement("tr");
+    extraTr.id = "extra-" + entryCount;
+    extraTr.innerHTML =
+        "<td colspan=\"4\">" +
+            "<div class=\"extra-fields\" id=\"extra-fields-" + entryCount + "\">" +
+                "<div class=\"extra-row\">" +
+                    "<label>Location</label>" +
+                    "<input type=\"text\" placeholder=\"Room 301, Zoom link, etc.\" data-entry=\"" + entryCount + "\" data-field=\"location\">" +
+                "</div>" +
+                "<div class=\"extra-row\">" +
+                    "<label>Notes / Description</label>" +
+                    "<textarea placeholder=\"Additional details about this event...\" data-entry=\"" + entryCount + "\" data-field=\"notes\"></textarea>" +
+                "</div>" +
+                "<div class=\"extra-row\">" +
+                    "<label>URL / Link</label>" +
+                    "<input type=\"text\" placeholder=\"https://zoom.us/...\" data-entry=\"" + entryCount + "\" data-field=\"url\">" +
+                "</div>" +
+            "</div>" +
+        "</td>";
+
+    tbody.appendChild(extraTr);
+
+    setupEntryListeners(entryCount);
+}
+
         
         function setupEntryListeners(entryId) {
             const tr = document.querySelector("tr[data-entry=\"" + entryId + "\"]");
@@ -1635,6 +1673,7 @@ tr.innerHTML = "<td><div class=\"time-input\"><input type=\"text\" placeholder=\
     </script>
 </body>
 </html>
+
 
 
 
