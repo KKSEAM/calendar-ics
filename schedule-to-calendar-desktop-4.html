@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Schedule to Calendar - Desktop</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Schedule to Calendar - Desktop</title>
+
     <style>
         * {
             margin: 0;
@@ -947,15 +948,16 @@
             updateDateButtons('tomorrow');
         }
 
-        function toggleAMPM(entryId) {
-            const btn = document.querySelector('[data-entry="' + entryId + '"][data-field="period"]');
-            if (btn && !btn.disabled) {
-                const currentValue = btn.textContent.trim();
-                const newValue = currentValue === 'AM' ? 'PM' : 'AM';
-                btn.textContent = newValue;
-                cascadeAMPM(entryId);
-            }
-        }
+        function toggleAMPM(button) {
+    if (button.disabled) return;
+
+    const currentValue = button.textContent.trim();
+    const newValue = currentValue === 'AM' ? 'PM' : 'AM';
+    button.textContent = newValue;
+
+    const entryId = button.dataset.entry;
+    cascadeAMPM(entryId);
+}
 
         function chooseDate() {
             const dateInput = document.getElementById('scheduleDate');
@@ -1031,7 +1033,9 @@
             tr.id = 'entry-' + entryCount;
             tr.dataset.entry = entryCount;
 
-            tr.innerHTML = '<td><div class="time-input"><input type="text" placeholder="8:00" data-entry="' + entryCount + '" data-field="time" maxlength="5"><button type="button" class="ampm-btn" data-entry="' + entryCount + '" data-field="period" onclick="toggleAMPM(' + entryCount + ')">AM</button></div></td><td><input type="text" class="desc-input" placeholder="Meeting, task, etc..." data-entry="' + entryCount + '" data-field="description"></td><td><div class="time-input"><input type="text" placeholder="9:00" data-entry="' + entryCount + '" data-field="endtime" maxlength="5"><button type="button" class="ampm-btn" data-entry="' + entryCount + '" data-field="endperiod" onclick="toggleAMPM(' + entryCount + ')" disabled>AM</button></div></td><td><div class="row-actions"><button type="button" class="more-btn" onclick="toggleExtra(' + entryCount + ')" id="more-' + entryCount + '" title="More options">⋯</button><button type="button" class="action-btn" id="action-' + entryCount + '" onclick="toggleAction(' + entryCount + ')" title="Reset/Delete">✕</button></div></td>';
+            tr.innerHTML = '<td><div class="time-input"><input type="text" placeholder="8:00" data-entry="' + entryCount + '" data-field="time" maxlength="5"><button type="button" class="ampm-btn" data-entry="' + entryCount + '" data-field="period" onclick="toggleAMPM(this)"
+>AM</button></div></td><td><input type="text" class="desc-input" placeholder="Meeting, task, etc..." data-entry="' + entryCount + '" data-field="description"></td><td><div class="time-input"><input type="text" placeholder="9:00" data-entry="' + entryCount + '" data-field="endtime" maxlength="5"><button type="button" class="ampm-btn" data-entry="' + entryCount + '" data-field="endperiod" onclick="toggleAMPM(this)"
+ disabled>AM</button></div></td><td><div class="row-actions"><button type="button" class="more-btn" onclick="toggleExtra(' + entryCount + ')" id="more-' + entryCount + '" title="More options">⋯</button><button type="button" class="action-btn" id="action-' + entryCount + '" onclick="toggleAction(' + entryCount + ')" title="Reset/Delete">✕</button></div></td>';
 
             tbody.appendChild(tr);
 
